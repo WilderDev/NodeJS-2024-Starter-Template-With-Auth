@@ -1,5 +1,7 @@
+// * IMPORTS
 const { model, Schema, Types } = require("mongoose");
 
+// * SCHEMA
 const TokenSchema = new Schema(
 	{
 		refreshToken: { type: String, required: true },
@@ -15,6 +17,7 @@ const TokenSchema = new Schema(
 	{ timestamps: true }
 );
 
+// * MODEL
 const Token = model("Token", TokenSchema);
 
 // * EXPORTS

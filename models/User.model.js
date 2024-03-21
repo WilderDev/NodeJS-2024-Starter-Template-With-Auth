@@ -1,7 +1,9 @@
+// * IMPORTS
 const { Schema, model } = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+// * SCHEMA
 const UserSchema = new Schema({
 	username: {
 		type: String,
@@ -40,17 +42,22 @@ const UserSchema = new Schema({
 	}
 });
 
+// * MIDDLEWARE
+// Hash password before saving
 UserSchema.pre("save", async function () {
 	if (!this.isModified("password")) return;
 	const salt = await bcrypt.genSalt(10);
 	this.password = await bcrypt.hash(this.password, salt);
 });
 
+// * METHODS
+// Compare password with hashed password
 UserSchema.methods.comparePass = async function (candidatePass) {
 	const isMatch = await bcrypt.compare(candidatePass, this.password);
 	return isMatch;
 };
 
+// Generate token
 UserSchema.methods.generateToken = function () {
 	const token = jwt.sign(
 		{
@@ -63,6 +70,7 @@ UserSchema.methods.generateToken = function () {
 	return token;
 };
 
+// * MODEL
 const User = model("User", UserSchema);
 
 // * EXPORTS

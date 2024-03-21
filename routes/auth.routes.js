@@ -10,6 +10,7 @@ const {
 } = require("../controllers/auth.controller");
 const { authenticateUser } = require("../middleware/auth.middleware");
 
+// * INIT ROUTER
 const router = express.Router();
 
 // * ROUTES
@@ -20,4 +21,6 @@ router.post("/verify", verifyEmail);
 router.post("/reset-password", resetPass);
 router.post("/forgot-password", forgotPass);
 router.get("/me", authenticateUser, me)
+
+// * EXPORTS
 module.exports = router;
