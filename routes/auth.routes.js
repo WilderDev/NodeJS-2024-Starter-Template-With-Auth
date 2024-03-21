@@ -1,4 +1,4 @@
-// IMPORTS
+// * IMPORTS
 const express = require("express");
 const {
 	registerUser,
@@ -12,7 +12,7 @@ const { authenticateUser } = require("../middleware/auth.middleware");
 
 const router = express.Router();
 
-// ROUTES
+// * ROUTES
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.delete("/logout", authenticateUser, logoutUser);
@@ -20,4 +20,5 @@ router.post("/verify", verifyEmail);
 router.post("/reset-password", resetPass);
 router.post("/forgot-password", forgotPass);
 
+// * EXPORTS
 module.exports = router;
