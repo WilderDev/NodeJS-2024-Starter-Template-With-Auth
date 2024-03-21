@@ -1,8 +1,9 @@
-// IMPORTS
+// * IMPORTS
 const { isTokenValid, attachCookies } = require("../lib/jwt");
 const { Token } = require("../models/Token.model");
 
-// MIDDLEWARE
+// * MIDDLEWARE
+// Authenticate user
 async function authenticateUser(req, res, next) {
 	const { refreshToken, accessToken } = req.signedCookies;
 
@@ -38,6 +39,7 @@ async function authenticateUser(req, res, next) {
 	}
 }
 
+// Authorize permissions
 const authorizePermissions = (...roles) => {
 	return (req, res, next) => {
 		if (!roles.includes(req.user.role)) {
@@ -52,4 +54,5 @@ const authorizePermissions = (...roles) => {
 	};
 };
 
+// * EXPORTS
 module.exports = { authenticateUser, authorizePermissions };
