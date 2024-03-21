@@ -65,4 +65,5 @@ UserSchema.methods.generateToken = function () {
 
 const User = model("User", UserSchema);
 
+// * EXPORTS
 module.exports = User;
