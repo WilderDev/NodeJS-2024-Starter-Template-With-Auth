@@ -219,7 +219,7 @@ const verifyEmail = async (req, res) => {
 	});
 };
 
-// * EXPORTS
+// CONTROLLER: Me
 const me = async (req, res) => {
 	const user = await User.findOne({ _id: req.user.userId });
     if (!user) {
@@ -232,4 +232,5 @@ const me = async (req, res) => {
     res.status(200).json({ success: true, data: { user } });
 }
 
+// * EXPORTS
 module.exports = { registerUser, loginUser, logoutUser, forgotPass, resetPass, verifyEmail, me };
