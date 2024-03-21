@@ -212,4 +212,16 @@ const verifyEmail = async (req, res) => {
 	});
 };
 
-module.exports = { registerUser, loginUser, logoutUser, forgotPass, resetPass, verifyEmail };
+const me = async (req, res) => {
+	const user = await User.findOne({ _id: req.user.userId });
+    if (!user) {
+		// TODO: Change this to the correct res resonse
+        return res.status(401).json({
+            success: false,
+            data: { message: "user not signed in" }
+        });
+    }
+    res.status(200).json({ success: true, data: { user } });
+}
+
+module.exports = { registerUser, loginUser, logoutUser, forgotPass, resetPass, verifyEmail, me };
