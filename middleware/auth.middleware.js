@@ -1,8 +1,7 @@
 // * IMPORTS
-const { isTokenValid, attachCookies } = require("../lib/jwt");
+const { isTokenValid, attachCookies } = require("../lib/auth/jwt");
 const { Token } = require("../models/Token.model");
-const { bad} = require('../lib/utils/res');
-
+const { bad } = require("../lib/utils/res");
 
 // * MIDDLEWARE
 // Authenticate User
@@ -31,7 +30,7 @@ async function authenticateUser(req, res, next) {
 
 		// If the token doesn't exist or isn't valid, send a 401 response
 		if (!existingToken || !existingToken?.isValid) {
-			return bad({res, status: 401, message: "Unauthorized"})
+			return bad({ res, status: 401, message: "Unauthorized" });
 		} else {
 			// If the token is valid, attach the cookies and move on to the next middleware
 			attachCookies({
@@ -45,7 +44,7 @@ async function authenticateUser(req, res, next) {
 			return next(); // Move on to the next middleware
 		}
 	} catch (err) {
-		return bad({res, status: 500, message: "Server Error"})
+		return bad({ res, status: 500, message: "Server Error" });
 	}
 }
 
@@ -55,7 +54,7 @@ const authorizePermissions = (...roles) => {
 	return (req, res, next) => {
 		// If the user's role isn't included in the roles array, send a 401 response
 		if (!roles.includes(req.user.role)) {
-			return bad({res, status: 401, message: "Unauthorized"})
+			return bad({ res, status: 401, message: "Unauthorized" });
 		}
 
 		next(); // Move on to the next middleware

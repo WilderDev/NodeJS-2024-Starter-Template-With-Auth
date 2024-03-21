@@ -2,9 +2,9 @@
 const User = require("../models/User.model.js");
 const Token = require("../models/Token.model.js");
 const crypto = require("crypto");
-const { sendResetPasswordEmail, sendVerificationEmail } = require("../lib/utils/nodemailer");
-const { attachCookies } = require("../lib/utils/jwt");
-const {good, bad} = require('../lib/utils/res');
+const { sendResetPasswordEmail, sendVerificationEmail } = require("../lib/emails/nodemailer");
+const { attachCookies } = require("../lib/auth/jwt");
+const { good, bad } = require("../lib/utils/res");
 
 // * CONTROLLERS
 // CONTROLLER: Register User
@@ -15,14 +15,14 @@ const registerUser = async (req, res) => {
 
 	// If the email is already taken, send a 400 response
 	if (emailTaken) {
-		return bad({res, message: "Invalid username or email"})
+		return bad({ res, message: "Invalid username or email" });
 	}
 
 	const usernameTaken = await User.findOne({ username }); // Check if the username is already taken
 
 	// If the username is already taken, send a 400 response
 	if (usernameTaken) {
-		return  bad({res, message: "Invalid username or email"})
+		return bad({ res, message: "Invalid username or email" });
 	}
 
 	const isFirstUser = (await User.countDocuments({})) === 0; // Check if the user is the first user
@@ -32,13 +32,13 @@ const registerUser = async (req, res) => {
 
 	// If the email, password, or username is missing, send a 400 response
 	if (!email || !password1 || !password2 || !username) {
-		return bad({res, message: "Invalid Fields"});
+		return bad({ res, message: "Invalid Fields" });
 	}
 
 	// If the passwords don't match, send a 400 response
 	if (password1 !== password2) {
-		return bad({res, message: "Passwords do not match"});
-	};
+		return bad({ res, message: "Passwords do not match" });
+	}
 
 	// Create a new user
 	const user = await User.create({
@@ -59,7 +59,7 @@ const registerUser = async (req, res) => {
 		url: serverUrlString
 	});
 
-	return good({res, data: {user }}); // Send a 200 response with the user
+	return good({ res, data: { user } }); // Send a 200 response with the user
 };
 
 // CONTROLLER: Login User
@@ -68,27 +68,26 @@ const loginUser = async (req, res) => {
 
 	// If the email or password is missing, send a 400 response
 	if (!email || !password) {
-		return bad({res, message: "Email or password not valid"});
+		return bad({ res, message: "Email or password not valid" });
 	}
 
 	const user = await User.findOne({ email }); // Find the user by email
 
 	// If the user doesn't exist, send a 401 response
 	if (!user) {
-		return bad({res, status: 401, message: "Invalid username or password"});
+		return bad({ res, status: 401, message: "Invalid username or password" });
 	}
-
 
 	const isPassCorrect = await user.comparePass(password); // Compare the password with the hashed password
 
 	// If the password is incorrect, send a 401 response
 	if (!isPassCorrect) {
-		return bad({res, status: 401, message: "Invalid username or password"});
+		return bad({ res, status: 401, message: "Invalid username or password" });
 	}
 
 	// If the user isn't verified, send a 401 response
 	if (!user.isVerified) {
-		return bad({res, status: 401, message: "Email not verified"});
+		return bad({ res, status: 401, message: "Email not verified" });
 	}
 
 	const tokenUser = { name: user.username, userId: user._id, role: user.role }; // Create a token user
@@ -102,15 +101,14 @@ const loginUser = async (req, res) => {
 
 		// If the token isn't valid, send a 401 response
 		if (!isValid) {
-			return bad({res, status: 401, message: "Unauthorized"});
+			return bad({ res, status: 401, message: "Unauthorized" });
 		}
 
 		refreshToken = existingToken.refreshToken; // Set the refresh token to the existing token's refresh token
 
-
 		attachCookies({ res, user: tokenUser, refreshToken }); // Attach the cookies
 
-		return good({res, data: { user: tokenUser }}); // Send a 200 response with the user
+		return good({ res, data: { user: tokenUser } }); // Send a 200 response with the user
 	}
 
 	refreshToken = crypto.randomBytes(40).toString("hex");
@@ -138,7 +136,7 @@ const logoutUser = async (req, res) => {
 		expires: new Date(Date.now())
 	});
 
-	return good({res, data: { message: "user logged out" }}); // Send a 200 response
+	return good({ res, data: { message: "user logged out" } }); // Send a 200 response
 };
 
 // CONTROLLER: Forgot Password
@@ -147,7 +145,7 @@ const forgotPass = async (req, res) => {
 
 	// If the email is missing, send a 400 response
 	if (!email) {
-		return bad({res, message: "Invalid email"});
+		return bad({ res, message: "Invalid email" });
 	}
 
 	const user = await User.findOne({ email }); // Find the user by email
@@ -175,7 +173,7 @@ const forgotPass = async (req, res) => {
 		await user.save(); // Save the user
 	}
 
-	return good({res, data: { message: "Check your email for reset link" }}); // Send a 200 response
+	return good({ res, data: { message: "Check your email for reset link" } }); // Send a 200 response
 };
 
 // CONTROLLER: Reset Password
@@ -184,7 +182,7 @@ const resetPass = async (req, res) => {
 
 	// If the token, email, or password is missing, send a 400 response
 	if (!token || !email || !password) {
-		return bad({res, message: "Invalid token, email, or password"});
+		return bad({ res, message: "Invalid token, email, or password" });
 	}
 
 	const user = await User.findOne({ email }); // Find the user by email
@@ -204,13 +202,12 @@ const resetPass = async (req, res) => {
 
 			await user.save(); // Save the user
 
-			return good({res, data: { message: "Success: Reset password" }}); // Send a 200 response
+			return good({ res, data: { message: "Success: Reset password" } }); // Send a 200 response
 		} else {
-			return bad({res, message: "Invalid token"}); // Send a 400 response
-
+			return bad({ res, message: "Invalid token" }); // Send a 400 response
 		}
 	} else {
-		return  bad({res, message: "Please try again"}); // Send a 400 response
+		return bad({ res, message: "Please try again" }); // Send a 400 response
 	}
 };
 
@@ -222,12 +219,12 @@ const verifyEmail = async (req, res) => {
 
 	// If the user doesn't exist, send a 401 response
 	if (!user) {
-		return bad({res, status: 401, message: "Verification failed"});
+		return bad({ res, status: 401, message: "Verification failed" });
 	}
 
 	// If the user is already verified, send a 401 response
 	if (user.verificationToken !== verificationToken) {
-		return bad({res, status: 401, message: "Verification failed"});
+		return bad({ res, status: 401, message: "Verification failed" });
 	}
 
 	user.isVerified = true; // Set the user to verified
@@ -236,7 +233,7 @@ const verifyEmail = async (req, res) => {
 
 	await user.save(); // Save the user
 
-	return good({res, data: { message: "Success: Email verified" }}); // Send a 200 response
+	return good({ res, data: { message: "Success: Email verified" } }); // Send a 200 response
 };
 
 // CONTROLLER: Me
@@ -244,12 +241,12 @@ const me = async (req, res) => {
 	const user = await User.findOne({ _id: req.user.userId }); // Find the user by id
 
 	// If the user doesn't exist, send a 401 response
-    if (!user) {
-	return bad({res, status: 401, message: "User not found"});
-    }
+	if (!user) {
+		return bad({ res, status: 401, message: "User not found" });
+	}
 
-	return good({res, data: { user }}); // Send a 200 response with the user
-}
+	return good({ res, data: { user } }); // Send a 200 response with the user
+};
 
 // * EXPORTS
 module.exports = { registerUser, loginUser, logoutUser, forgotPass, resetPass, verifyEmail, me };
