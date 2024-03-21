@@ -1,11 +1,13 @@
-// IMPORTS
+// * IMPORTS
 const User = require("../models/User.model.js");
 const Token = require("../models/Token.model.js");
 const crypto = require("crypto");
 const { sendResetPasswordEmail, sendVerificationEmail } = require("../lib/utils/nodemailer");
 const { attachCookies } = require("../lib/utils/jwt");
+const {good, bad} = require('../lib/utils/res') // TODO: Use these functions to send responses
 
-// CONTROLLERS
+// * CONTROLLERS
+// CONTROLLER: Register User
 const registerUser = async (req, res) => {
 	const { email, password1, password2, username } = req.body;
 
@@ -61,6 +63,7 @@ const registerUser = async (req, res) => {
 	res.status(200).json({ success: true, data: { user } });
 };
 
+// CONTROLLER: Login User
 const loginUser = async (req, res) => {
 	const { email, password } = req.body;
 	if (!email || !password) {
@@ -120,6 +123,7 @@ const loginUser = async (req, res) => {
 	res.status(200).json({ success: true, data: { user: tokenUser } });
 };
 
+// CONTROLLER: Logout User
 const logoutUser = async (req, res) => {
 	await Token.findOneAndDelete({ user: req.user.userId });
 	res.cookie("accessToken", "logout", {
@@ -133,6 +137,7 @@ const logoutUser = async (req, res) => {
 	res.status(200).json({ success: true, data: { message: "user logged out" } });
 };
 
+// CONTROLLER: Forgot Password
 const forgotPass = async (req, res) => {
 	const { email } = req.body;
 	if (!email) {
@@ -160,6 +165,7 @@ const forgotPass = async (req, res) => {
 	res.status(200).json({ success: true, data: { message: "check email for reset link" } });
 };
 
+// CONTROLLER: Reset Password
 const resetPass = async (req, res) => {
 	const { token, email, password } = req.body;
 	if (!token || !email || !password) {
@@ -185,6 +191,7 @@ const resetPass = async (req, res) => {
 	}
 };
 
+// CONTROLLER: Verify Email
 const verifyEmail = async (req, res) => {
 	const { verificationToken, email } = req.body;
 	const user = await User.findOne({ email });
@@ -212,4 +219,5 @@ const verifyEmail = async (req, res) => {
 	});
 };
 
+// * EXPORTS
 module.exports = { registerUser, loginUser, logoutUser, forgotPass, resetPass, verifyEmail };
