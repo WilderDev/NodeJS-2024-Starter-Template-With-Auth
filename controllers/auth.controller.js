@@ -49,7 +49,7 @@ const registerUser = async (req, res) => {
 		verificationToken
 	});
 
-	let serverUrlString; // TODO: Set this to the server URL depending on the environment
+	let serverUrlString = process.env.SERVER_URL; // TODO: Set this to the server URL depending on the environment
 
 	// Send a verification email
 	await sendVerificationEmail({
@@ -150,7 +150,7 @@ const forgotPass = async (req, res) => {
 
 	const user = await User.findOne({ email }); // Find the user by email
 
-	let serverUrlString; // TODO: Set this to the server URL depending on the environment
+	let serverUrlString = process.env.SERVER_URL; // TODO: Set this to the server URL depending on the environment
 
 	// If the user exists, send a reset password email
 	if (user) {
@@ -236,6 +236,32 @@ const verifyEmail = async (req, res) => {
 	return good({ res, data: { message: "Success: Email verified" } }); // Send a 200 response
 };
 
+// CONTROLLER: Resend Verification Email
+const resendVerification = async (req, res) => {
+	// Destructure the email from the request body
+	const { email } = req.body;
+
+	// Find the user by their email in the database
+	const user = await User.findOne({
+		email
+	});
+
+	// Define a variable to hold the server URL string
+	let serverUrlString = process.env.SERVER_URL; //TODO Same as on register user
+
+	// Send a verification email to the user
+	await sendVerificationEmail({
+		// Pass the user's username, email, verification token, and server URL to the email sending function
+		username: user.username,
+		email: user.email,
+		verificationToken: user.verificationToken,
+		url: serverUrlString
+	});
+
+	// Send a successful response (HTTP 200) with the user data
+	return good({ res, data: { user } });
+};
+
 // CONTROLLER: Me
 const me = async (req, res) => {
 	const user = await User.findOne({ _id: req.user.userId }); // Find the user by id
@@ -249,4 +275,13 @@ const me = async (req, res) => {
 };
 
 // * EXPORTS
-module.exports = { registerUser, loginUser, logoutUser, forgotPass, resetPass, verifyEmail, me };
+module.exports = {
+	registerUser,
+	loginUser,
+	logoutUser,
+	forgotPass,
+	resetPass,
+	verifyEmail,
+	resendVerification,
+	me
+};
