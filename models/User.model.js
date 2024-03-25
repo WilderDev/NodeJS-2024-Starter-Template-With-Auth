@@ -45,20 +45,24 @@ const UserSchema = new Schema({
 // * MIDDLEWARE
 // Hash password before saving
 UserSchema.pre("save", async function () {
-	if (!this.isModified("password")) return;
-	const salt = await bcrypt.genSalt(10);
-	this.password = await bcrypt.hash(this.password, salt);
+	if (!this.isModified("password")) return; // If the password hasn't been modified, move on to the next middleware
+
+	const salt = await bcrypt.genSalt(10); // Generate a salt
+
+	this.password = await bcrypt.hash(this.password, salt); // Hash the password
 });
 
 // * METHODS
 // Compare password with hashed password
 UserSchema.methods.comparePass = async function (candidatePass) {
-	const isMatch = await bcrypt.compare(candidatePass, this.password);
-	return isMatch;
+	const isMatch = await bcrypt.compare(candidatePass, this.password); // Compare the candidate password with the hashed password
+
+	return isMatch; // Return the result
 };
 
 // Generate token
 UserSchema.methods.generateToken = function () {
+	// Generate a token
 	const token = jwt.sign(
 		{
 			id: this._id,
@@ -67,7 +71,8 @@ UserSchema.methods.generateToken = function () {
 		process.env.JWT_SECRET,
 		{ expiresIn: process.env.JWT_LIFETIME }
 	);
-	return token;
+
+	return token; // Return the token
 };
 
 // * MODEL

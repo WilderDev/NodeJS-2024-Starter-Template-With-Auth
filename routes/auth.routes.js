@@ -1,26 +1,26 @@
 // * IMPORTS
-const express = require("express");
+const router = require("express").Router(); // Import express router
 const {
 	registerUser,
 	loginUser,
 	verifyEmail,
 	logoutUser,
 	resetPass,
-	forgotPass
+	forgotPass,
+	resendVerification,
+	me
 } = require("../controllers/auth.controller");
 const { authenticateUser } = require("../middleware/auth.middleware");
 
-// * INIT ROUTER
-const router = express.Router();
-
 // * ROUTES
-router.post("/register", registerUser);
-router.post("/login", loginUser);
-router.delete("/logout", authenticateUser, logoutUser);
-router.post("/verify", verifyEmail);
-router.post("/reset-password", resetPass);
-router.post("/forgot-password", forgotPass);
-router.get("/me", authenticateUser, me)
+router.post("/register", registerUser); // Register a new user
+router.post("/login", loginUser); // Login a user
+router.delete("/logout", authenticateUser, logoutUser); // Logout a user
+router.post("/verify", verifyEmail); // Verify email
+router.post("/resend-verification", resendVerification);
+router.post("/reset-password", resetPass); // Reset password
+router.post("/forgot-password", forgotPass); // Forgot password
+router.get("/me", authenticateUser, me); // Get user details
 
 // * EXPORTS
 module.exports = router;
