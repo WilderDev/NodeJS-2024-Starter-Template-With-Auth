@@ -155,7 +155,6 @@ const forgotPass = async (req, res) => {
 	// If the user exists, send a reset password email
 	if (user) {
 		const passwordToken = crypto.randomBytes(70).toString("hex"); // Generate a password token
-
 		// Send a reset password email
 		await sendResetPasswordEmail({
 			username: user.username,
@@ -167,13 +166,13 @@ const forgotPass = async (req, res) => {
 		const tenMinutes = 1000 * 60 * 10; // Set the expiration date to 10 minutes
 		const passwordTokenExpirationDate = new Date(Date.now() + tenMinutes); // Set the expiration date
 
-		user.passwordToken = crypto.createHash(passwordToken); // Set the password token
+		user.passwordToken = passwordToken; // Set the password token
 		user.passwordTokenExpirationDate = passwordTokenExpirationDate; // Set the expiration date
 
 		await user.save(); // Save the user
+		//TODO Remove password token from res
+		return good({ res, data: { message: "Check your email for reset link", passwordToken } }); // Send a 200 response
 	}
-
-	return good({ res, data: { message: "Check your email for reset link" } }); // Send a 200 response
 };
 
 // CONTROLLER: Reset Password
@@ -192,10 +191,7 @@ const resetPass = async (req, res) => {
 		const currentDate = new Date(); // Get the current date
 
 		// If the password token and expiration date are valid, reset the password
-		if (
-			user.passwordToken === crypto.createHash(token) &&
-			user.passwordTokenExpirationDate > currentDate
-		) {
+		if (user.passwordToken === token && user.passwordTokenExpirationDate > currentDate) {
 			user.password = password; // Set the password
 			user.passwordToken = null; // Set the password token to null
 			user.passwordTokenExpirationDate = null; // Set the expiration date to null
